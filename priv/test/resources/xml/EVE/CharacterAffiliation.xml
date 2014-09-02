@@ -1,0 +1,11 @@
+<eveapi version="2">
+<currentTime>2014-06-06 13:06:41</currentTime>
+<result>
+<rowset name="characters" key="characterID" columns="characterName,characterID,corporationName,corporationID,allianceName,allianceID,factionName,factionID">
+<row characterID="92168909" characterName="CCP FoxFour" corporationID="109299958" corporationName="C C P" allianceID="434243723" allianceName="C C P Alliance" factionID="0" factionName=""/>
+<row characterID="1188435724" characterName="CCP Prism X" corporationID="109299958" corporationName="C C P" allianceID="434243723" allianceName="C C P Alliance" factionID="0" factionName=""/>
+<row characterID="196379789" characterName="Chribba" corporationID="1164409536" corporationName="Otherworld Enterprises" allianceID="159826257" allianceName="Otherworld Empire" factionID="0" factionName=""/>
+</rowset>
+</result>
+<cachedUntil>2014-06-06 14:06:41</cachedUntil>
+</eveapi>

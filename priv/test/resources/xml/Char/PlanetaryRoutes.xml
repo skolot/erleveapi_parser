@@ -1,0 +1,17 @@
+<eveapi version="2">
+  <currentTime>2014-06-09 09:38:51</currentTime>
+  <result>
+    <rowset name="routes" key="routeID" columns="routeID,sourcePinID,destinationPinID,contentTypeID,contentTypeName,quantity,waypoint1,waypoint2,waypoint3,waypoint4,waypoint5">
+      <row routeID="605707985" sourcePinID="1014990361645" destinationPinID="1014990361652" contentTypeID="2310" contentTypeName="Noble Gas" quantity="451" waypoint1="0" waypoint2="0" waypoint3="0" waypoint4="0" waypoint5="0" />
+      <row routeID="605707986" sourcePinID="1014990361646" destinationPinID="1014990361652" contentTypeID="2311" contentTypeName="Reactive Gas" quantity="1216" waypoint1="0" waypoint2="0" waypoint3="0" waypoint4="0" waypoint5="0" />
+      <row routeID="605707988" sourcePinID="1014990361647" destinationPinID="1014990361650" contentTypeID="2392" contentTypeName="Oxidizing Compound" quantity="20" waypoint1="0" waypoint2="0" waypoint3="0" waypoint4="0" waypoint5="0" />
+      <row routeID="605707987" sourcePinID="1014990361649" destinationPinID="1014990361650" contentTypeID="3683" contentTypeName="Oxygen" quantity="20" waypoint1="0" waypoint2="0" waypoint3="0" waypoint4="0" waypoint5="0" />
+      <row routeID="605707991" sourcePinID="1014990361650" destinationPinID="1014990361651" contentTypeID="2317" contentTypeName="Oxides" quantity="5" waypoint1="0" waypoint2="0" waypoint3="0" waypoint4="0" waypoint5="0" />
+      <row routeID="605707989" sourcePinID="1014990361652" destinationPinID="1014990361649" contentTypeID="2310" contentTypeName="Noble Gas" quantity="3000" waypoint1="1014990361647" waypoint2="1014990361650" waypoint3="0" waypoint4="0" waypoint5="0" />
+      <row routeID="605707990" sourcePinID="1014990361652" destinationPinID="1014990361647" contentTypeID="2311" contentTypeName="Reactive Gas" quantity="3000" waypoint1="0" waypoint2="0" waypoint3="0" waypoint4="0" waypoint5="0" />
+    </rowset>
+  </result>
+  <cachedUntil>2014-06-09 10:38:51</cachedUntil>
+ 
+</eveapi>
+

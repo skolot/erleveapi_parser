@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<eveapi version="2">
+  <currentTime>2014-07-19 17:40:06</currentTime>
+  <result>
+    <rowset name="facilities" key="facilityID" 
+            columns="facilityID,typeID,typeName,solarSystemID,solarSystemName,regionID,regionName,starbaseModifier,tax">
+      <row facilityID="1015338119996" typeID="33867" typeName="Thukker Component Assembly Array" 
+           solarSystemID="30005195" solarSystemName="Vecamia" regionID="10000067" regionName="Genesis" starbaseModifier="0" tax="0" />
+      <row facilityID="1015338120763" typeID="24660" typeName="Component Assembly Array" 
+           solarSystemID="30005195" solarSystemName="Vecamia" regionID="10000067" regionName="Genesis" starbaseModifier="0" tax="0" />
+      <row facilityID="1015338129650" typeID="28351" typeName="Design Laboratory" 
+           solarSystemID="30005195" solarSystemName="Vecamia" regionID="10000067" regionName="Genesis" starbaseModifier="0" tax="0" />
+      <row facilityID="1015338129652" typeID="24567" typeName="Experimental Laboratory" 
+           solarSystemID="30005195" solarSystemName="Vecamia" regionID="10000067" regionName="Genesis" starbaseModifier="0" tax="0" />
+      <row facilityID="1015338129655" typeID="32245" typeName="Hyasyoda Research Laboratory" 
+           solarSystemID="30005195" solarSystemName="Vecamia" regionID="10000067" regionName="Genesis" starbaseModifier="0" tax="0" />
+    </rowset>
+  </result>
+  <cachedUntil>2014-07-19 17:54:29</cachedUntil>
+</eveapi>
