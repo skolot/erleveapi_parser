@@ -25,10 +25,17 @@ process(XML) when is_list(XML) ->
 process(#xmlElement{name = eveapi, content = Content}) ->
     case lists:keyfind(result, #xmlElement.name, filter_xml_elements(Content)) of
         false ->
-            [];
+            case lists:keyfind(error, #xmlElement.name, filter_xml_elements(Content)) of
+                false ->
+                    [];
+                #xmlElement{} = ErrDescrEl ->
+                    process(ErrDescrEl)
+            end;
         #xmlElement{} = El ->
             process(El)
     end;
+process(#xmlElement{name = error, attributes = [#xmlAttribute{value = Code}], content = [#xmlText{value = Text}]}) ->
+    [{error, [{code, Code}, {text, Text}]}];
 process(#xmlElement{name = result, content = Content}) ->
     lists:flatten([process(El) || El <- filter_xml_elements(Content)]);
 process(#xmlElement{name = rowset, attributes = Attrs, content = Content}) ->
