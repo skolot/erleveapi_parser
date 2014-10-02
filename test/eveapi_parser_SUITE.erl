@@ -54,6 +54,8 @@
          {corporationTitles,[[{titleID,<<"1">>},{titleName,<<"Member">>}]]}]
        ).
 
+-define(ERROR_203_PLIST, [{error,[{code,"203"},{text,"Authentication failure."}]}]).
+
 eveapi_parser_test_() ->
     [
      {
@@ -69,12 +71,20 @@ eveapi_parser_test_() ->
      {
        "parser equal test",
        ?_test(parser_equal())
+     },
+     {
+       "parse error test",
+       ?_test(parser_error())
      }
     ].
 
 parser_equal() ->
     {ok, B} = file:read_file(?XMLDIR ++ "Char/CharacterSheet.xml"),
     ?assertEqual(?CHARCTER_SHEET_PLIST, eveapi_parser:xml_to_plist(B)).
+
+parser_error() ->
+    {ok, B} = file:read_file(?XMLDIR ++ "Error/203.xml"),
+    ?assertEqual(?ERROR_203_PLIST, eveapi_parser:xml_to_plist(B)).
     
 parse_xml({_Request, URL}) -> 
     %%?debugFmt("r ~p u ~p path ~p~n", [_Request, URL, ?XMLDIR ++ filename:dirname(URL) ++ "/" ++ filename:basename(URL, ".aspx")]),
