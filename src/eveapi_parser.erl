@@ -5,6 +5,12 @@
 %% API
 -export([xml_to_plist/1]).
 
+-ifndef(USE_PLIST).
+-define(GENELEMENT(K, V), maps:from_list([{K, V}])).
+-else.
+-define(GENELEMENT(K, V), {K, V}).
+-endif.
+
 %%%===================================================================
 %%% API
 %%%===================================================================
@@ -35,7 +41,7 @@ process(#xmlElement{name = eveapi, content = Content}) ->
             process(El)
     end;
 process(#xmlElement{name = error, attributes = [#xmlAttribute{value = Code}], content = [#xmlText{value = Text}]}) ->
-    [{error, [{code, Code}, {text, Text}]}];
+    [?GENELEMENT(error, [?GENELEMENT(code, Code), ?GENELEMENT(text, Text)])];
 process(#xmlElement{name = result, content = Content}) ->
     lists:flatten([process(El) || El <- filter_xml_elements(Content)]);
 process(#xmlElement{name = rowset, attributes = Attrs, content = Content}) ->
@@ -46,18 +52,15 @@ process(#xmlElement{name = rowset, attributes = Attrs, content = Content}) ->
             #xmlAttribute{value = V} ->
                 erlang:list_to_atom(V)
         end,
-    {
-      RowsetName,
-      lists:filter(fun([]) -> false; (_) -> true end, [process(C) || C <- Content])
-    };
+    ?GENELEMENT(RowsetName, lists:filter(fun([]) -> false; (_) -> true end, [process(C) || C <- Content]));
 process(#xmlElement{name = row, attributes = Attrs, content = Content}) ->
     lists:flatten([process(A) || A <- Attrs] ++ [process(lists:filter(fun(#xmlElement{}) -> true; (_) -> false end, Content))]);
 process(#xmlElement{name = Name, attributes = [], content = [#xmlText{value = Text}]}) ->
-    {Name, erlang:list_to_binary(Text)};
+    ?GENELEMENT(Name, erlang:list_to_binary(Text));
 process(#xmlElement{name = Name, attributes = [], content = Elements}) ->
-    {Name, [process(El) || El <- filter_xml_elements(Elements)]};
+    ?GENELEMENT(Name, [process(El) || El <- filter_xml_elements(Elements)]);
 process(#xmlAttribute{name = Name, value = Value}) ->
-    {Name, erlang:list_to_binary(Value)};
+    ?GENELEMENT(Name, erlang:list_to_binary(Value));
 process(_) ->
     [].
 
