@@ -1,23 +1,14 @@
 ERLC ?= erlc
 ERL ?= erl
-INSTALL ?= install 
+INSTALL ?= install
 INSTALL_FLAGS ?= -D -m 0644
 
-indir? = 
-outdir? = 
-
-ifeq "$(indir)" ""
-$(error "in dir not specified")
-endif
-
-ifeq "$(outdir)" ""
-$(error "out dir not specified")
-endif
+extra_erlcflags = $($(appname)_ERLCFLAGS)
 
 libdir ?= ../../deps
-ebindir = ebin
-srcdir = src
-testdir = test
+ebindir = ./ebin
+srcdir = ./src
+testdir = ./test
 
 parse_transform_modules = $(foreach erl,$(wildcard $(srcdir)/*erl), $(shell grep -h "compile.*parse_transform" $(erl) | sed -e 's@-compile({parse_transform,\(.*\)}).@\1@' | sort -u | while read mod; do test -f $(srcdir)/$${mod}.erl && echo $${mod}; done))
 
@@ -33,25 +24,25 @@ app_src_files = $(notdir $(basename $(wildcard $(srcdir)/*app.src)))
 app_out_files = $(addprefix $(ebindir)/,$(app_src_files))
 
 PATHA ?= $(addprefix -pa ,$(wildcard $(libdir)/*/ebin))
-ERLCFLAGS = -I. -I.. -I../../deps -Iinclude $(PATHA) -I$(outdir) -I$(outdir)/include
+ERLCFLAGS = -I. -I.. -I../../deps -Iinclude $(extra_erlcflags)
 
 $(ebindir)/%.beam: $(srcdir)/%.erl
-	$(VERBOSE)echo "[beam]" $(subdir)/$@
+	$(VERBOSE)echo "{$(appname)}[beam]" $(subdir)/$@ $(extra_erlcflags)
 	$(VERBOSE)$(ERLC) $(ERLCFLAGS) -o $(ebindir) $^
 
 $(ebindir)/%.beam: $(testdir)/%.erl
-	$(VERBOSE)echo "[test_suit]" $(subdir)/$@
+	$(VERBOSE)echo "{$(appname)}[test_suit]" $(subdir)/$@ $(extra_erlcflags)
 	$(VERBOSE)$(ERLC) $(ERLCFLAGS) -o $(ebindir) $^
 
 $(ebindir)/%.app: $(srcdir)/%.app.src
-	$(VERBOSE)echo "[app]" $(subdir)/$@
+	$(VERBOSE)echo "{$(appname)}[app]" $(subdir)/$@
 	$(VERBOSE)erl -noshell \
 		-eval 'case file:consult("$<") of {ok,_} -> ok ; \
 		{error,{L,M,T}} -> io:format("$<: ~s ~s ~s ~n", [L,M,T]), halt(1) end.' \
 		-s init stop
 	$(VERBOSE)cp $< $@
 
-mkdir = $(outdir) $(ebindir) $(outdir)/include $(outdir)/src $(etcdir)
+mkdir = $(ebindir)
 
 prepare: $(mkdir)
 
@@ -59,7 +50,7 @@ $(mkdir):
 	$(VERBOSE)echo "[mkdir]" $@
 	$(VERBOSE)mkdir -p $@
 
-compile: $(beam_out_files) $(app_out_files) $(etc_out_files) $(priv_out_files) $(beam_test_out_files)
+compile: prepare $(beam_out_files) $(app_out_files) $(etc_out_files) $(priv_out_files) $(beam_test_out_files)
 
 clean_files = $(beam_out_files)	$(app_out_files) $(etc_out_files) $(beam_test_out_files)
 
