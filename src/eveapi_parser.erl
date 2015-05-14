@@ -1,68 +1,92 @@
+%%% @author Roman Dayneko <roman.dayneko@gmail.com>
+%%% @copyright (C) 2015, Roman Dayneko
+%%% @doc
+%%%
+%%% @end
+%%% Created : 13 May 2015 by Roman Dayneko <roman.dayneko@gmail.com>
+%%%
+%%% thanks this article https://arifishaq.wordpress.com/2014/11/25/starting-to-play-with-xmerl/
+%%%
+
 -module(eveapi_parser).
 
 -include_lib("xmerl/include/xmerl.hrl").
 
 %% API
--export([xml_to_plist/1]).
+-export([encode/1, encode/2]).
 
--ifndef(USE_PLIST).
--define(GENELEMENT(K, V), maps:from_list([{K, V}])).
--else.
--define(GENELEMENT(K, V), {K, V}).
--endif.
 
 %%%===================================================================
 %%% API
 %%%===================================================================
 
-xml_to_plist(B) when is_binary(B) ->
-    xml_to_plist(erlang:binary_to_list(B));
-xml_to_plist(L) ->
-    {XML, _} = xmerl_scan:string(L, [{space,normalize},{encoding,"utf-8"}]),
-    process(XML).
+encode(B) when is_binary(B) ->
+    encode(map, erlang:binary_to_list(B));
+encode(L) when is_list(L) ->
+    encode(map, L).
 
+encode(Type, B) when is_binary(B) ->
+    encode(Type, erlang:binary_to_list(B));
+encode(plist, L) when is_list(L) ->
+    {Result, _} = xmerl_scan:string(L, [{hook_fun, fun element_hook/2}, {acc_fun, fun acc_hook/3}, {space, normalize}, {encoding, "utf-8"}]),
+    {ok, Result};
+encode(map, L) when is_list(L) ->
+    case encode(plist, L) of
+        {ok, Result} ->
+            {ok, plist_to_map([Result])};
+        Error  ->
+            Error
+    end.
 
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
 
-process(XML) when is_list(XML) ->
-    lists:flatten([process(Element) || Element <- XML]);
-process(#xmlElement{name = eveapi, content = Content}) ->
-    case lists:keyfind(result, #xmlElement.name, filter_xml_elements(Content)) of
-        false ->
-            case lists:keyfind(error, #xmlElement.name, filter_xml_elements(Content)) of
-                false ->
-                    [];
-                #xmlElement{} = ErrDescrEl ->
-                    process(ErrDescrEl)
-            end;
-        #xmlElement{} = El ->
-            process(El)
-    end;
-process(#xmlElement{name = error, attributes = [#xmlAttribute{value = Code}], content = [#xmlText{value = Text}]}) ->
-    [?GENELEMENT(error, [?GENELEMENT(code, Code), ?GENELEMENT(text, Text)])];
-process(#xmlElement{name = result, content = Content}) ->
-    lists:flatten([process(El) || El <- filter_xml_elements(Content)]);
-process(#xmlElement{name = rowset, attributes = Attrs, content = Content}) ->
+element_hook(#xmlElement{name = error, attributes = [#xmlAttribute{name = code, value = Code}], content = [Text]}, GlobalState) ->
+    {{error, [{code, Code}, {text, Text}]}, GlobalState};
+element_hook(#xmlElement{name = eveapi, content = Content, attributes = Attributes}, GlobalState) ->
+    ApiVersion =
+        case lists:keyfind(version, #xmlAttribute.name, Attributes) of
+            false ->
+                unknown;
+            #xmlAttribute{value = V} ->
+                erlang:list_to_integer(V)
+        end,
+    {{eveapi, [{version, ApiVersion} | Content]}, GlobalState};
+element_hook(#xmlElement{name = rowset, content = Content, attributes = Attributes}, GlobalState) ->
     RowsetName =
-        case lists:keyfind(name, #xmlAttribute.name, Attrs) of
+        case lists:keyfind(name, #xmlAttribute.name, Attributes) of
             false ->
                 unknown;
             #xmlAttribute{value = V} ->
                 erlang:list_to_atom(V)
         end,
-    ?GENELEMENT(RowsetName, lists:filter(fun([]) -> false; (_) -> true end, [process(C) || C <- Content]));
-process(#xmlElement{name = row, attributes = Attrs, content = Content}) ->
-    lists:flatten([process(A) || A <- Attrs] ++ [process(lists:filter(fun(#xmlElement{}) -> true; (_) -> false end, Content))]);
-process(#xmlElement{name = Name, attributes = [], content = [#xmlText{value = Text}]}) ->
-    ?GENELEMENT(Name, erlang:list_to_binary(Text));
-process(#xmlElement{name = Name, attributes = [], content = Elements}) ->
-    ?GENELEMENT(Name, [process(El) || El <- filter_xml_elements(Elements)]);
-process(#xmlAttribute{name = Name, value = Value}) ->
-    ?GENELEMENT(Name, erlang:list_to_binary(Value));
-process(_) ->
-    [].
+    {{RowsetName, Content}, GlobalState};
+element_hook(#xmlElement{name = row, content = [], attributes = Attributes}, GlobalState) ->
+    {[{Name, Value} || #xmlAttribute{name = Name, value = Value} <- Attributes], GlobalState};
+element_hook(#xmlElement{name = Name, content = Content, attributes = []}, GlobalState) ->
+    {{Name, Content}, GlobalState};
+element_hook(#xmlText{value = Value}, GlobalState) ->
+    {Value, GlobalState};
+element_hook(Entity, GlobaState) ->
+    {Entity, GlobaState}.
 
-filter_xml_elements(List) ->
-    lists:filter(fun(#xmlElement{}) -> true; (_) -> false end, List).
+acc_hook(" ", Acc, GlobalState) ->
+    {Acc, GlobalState};
+acc_hook({certificates, Certificates}, Acc, GlobalState) ->
+    {[{certificates, [Id || [{'certificateID', Id}] <- Certificates]} | Acc], GlobalState};
+acc_hook({Key, [Value]}, Acc, GlobalState) when is_list(Value) ->
+    {[{Key, Value} | Acc], GlobalState};
+acc_hook(Entity, Acc, GlobalState) ->
+    {[Entity | Acc], GlobalState}.
+
+plist_to_map([]) ->
+    [];
+plist_to_map([H | _] = ListOfLists) when is_list(H) ->
+    [plist_to_map(List) || List <- ListOfLists];
+plist_to_map([{_, _} | _] = PList) ->
+    maps:from_list([{K, plist_to_map(V)} || {K, V} <- PList]);
+%%  #{Key => plist_to_map(Value) || Key := Value <- M};
+%%  bugged maps: syntax error before: '||'
+plist_to_map(Element) ->
+    Element.
