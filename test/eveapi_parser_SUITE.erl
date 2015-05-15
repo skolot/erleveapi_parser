@@ -70,7 +70,7 @@
                           currentTime => "2014-10-02 11:13:56",
                           error => #{code => "203",text => "Authentication failure."},
                           version => 2}}}
-).
+       ).
 
 -define(CHARCTER_SHEET_MAP,
         {ok,#{eveapi => #{cachedUntil => "2007-06-18 23:49:01",
